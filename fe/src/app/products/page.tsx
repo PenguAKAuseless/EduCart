@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Heart, ShoppingCart, Grid3x3, List, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import HomeNavbar from "@/components/HomeNavbar";
 import HomeFooter from "@/components/HomeFooter";
+import { useRouter } from "next/navigation";
 
 const major_data: Record<string, Record<string, string[]>> = {
   "ĐH Bách Khoa TP.HCM": {
@@ -292,6 +293,8 @@ const products = [
 ];
 const ITEMS_PER_PAGE = 15;
 export default function ProductsPage() {
+  
+  const router = useRouter();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 // TEMP (user đang chọn)
   const [tempSchool, setTempSchool] = useState("");
@@ -571,108 +574,107 @@ export default function ProductsPage() {
             {/* GRID */}
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {paginatedProducts.map((product) => (
-                <Link
+                <div
                   key={product.id}
-                  href={`/products/${product.id}`}
                   className={
-                  viewMode === "grid"
-                    ? "group flex flex-col h-full rounded-2xl bg-white p-4 shadow-sm hover:shadow-lg transition"
-                    : "flex gap-4 rounded-2xl bg-white p-4 shadow-sm hover:shadow-lg transition"
-                    }>
-                    {/* Image */}
-                    <div className={viewMode === "grid"
-                      ? "relative mb-4 overflow-hidden rounded-xl bg-gray-200 h-40 w-full"
-                       : "relative overflow-hidden rounded-xl bg-gray-200 h-40 w-40 flex-shrink-0"
-                        }>
-                      <img src={product.image} alt={product.title}
-                        className="h-full w-full object-cover group-hover:scale-110 transition"
-                          onError={(e) => {
-                            const target = e.currentTarget;
-                            target.style.display = "none";
-                            const parent = target.parentElement;
-                            if (parent && !parent.querySelector(".cover-fallback")) {
-                              const fallback = document.createElement("div");
-                              fallback.className = "cover-fallback h-full w-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-200";
-                              fallback.innerHTML = `<span style="font-size:2.5rem;font-weight:700;color:#3b5bdb;opacity:0.5;">${product.title.charAt(0)}</span>`;
-                              parent.appendChild(fallback);
-                            }
-                          }}/>
-                      {/* Tag */}
-                      <div className="absolute right-2 top-2">
-                        <div className="rounded-md bg-orange-500 px-2 py-1 text-xs font-bold text-white">
-                          {product.tag}
-                        </div>
-                      </div>
-                      {/* Wishlist Button */}
-                      <button onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        toggleFavorite(product.id);
-                        }}
-                        className="absolute left-2 top-2 rounded-full bg-white p-2 shadow-md hover:bg-gray-100 transition"
+                    viewMode === "grid"
+                      ? "group flex flex-col h-full rounded-2xl bg-white p-4 shadow-sm hover:shadow-lg transition"
+                      : "flex gap-4 rounded-2xl bg-white p-4 shadow-sm hover:shadow-lg transition"
+                  }>
+                  {/* CLICK VÀO ĐÂY → đi product detail */}
+                  <Link href={`/products/${product.id}`}>
+                    <>
+                      {/* Image */}
+                      <div
+                        className={
+                          viewMode === "grid"
+                            ? "relative mb-4 overflow-hidden rounded-xl bg-gray-200 h-40 w-full"
+                            : "relative overflow-hidden rounded-xl bg-gray-200 h-40 w-40 flex-shrink-0"
+                        }
                       >
-                        <Heart className={`h-4 w-4 transition ${favorites.has(product.id)
-                        ? "fill-red-500 text-red-500": "text-gray-400" }`}
+                        <img
+                          src={product.image}
+                          alt={product.title}
+                          className="h-full w-full object-cover group-hover:scale-110 transition"
                       />
-                      </button>
-                    </div>
-                    {/* Product Info */}
-                    <div className={viewMode === "grid" ? "flex flex-col flex-1" : "flex-1"}>
-                      <div className={viewMode === "list" ? "" : "mb-4 flex-1"}>
-                        <p className="text-xs text-gray-500 font-medium">{product.type}</p>
-                          <h3 className="mt-1 font-semibold text-gray-900 line-clamp-2">
-                            {product.title}
-                          </h3>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {product.condition} • {product.year}
-                        </p>
-                        <p className="mt-1 text-xs text-gray-600">{product.author}</p>
-                      </div>
-                      {/* Price and Buy Button */}
-                      <div className="flex flex-col gap-3">
-                        {/* Price */}
-                        <div>
-                          <div className="flex items-baseline gap-2">
-                            <p className="text-lg font-bold text-blue-600">
-                              {product.price}
-                            </p>
-                            {product.originalPrice && (
-                              <p className="text-xs text-gray-500 line-through">
-                                {product.originalPrice}
-                              </p>
-                            )}
+
+                        {/* Tag */}
+                        <div className="absolute right-2 top-2">
+                          <div
+                            className={`rounded-md px-2 py-1 text-xs font-bold text-white ${
+                              product.tag === "Thuê" ? "bg-orange-500" : "bg-blue-600" }`}>
+                            {product.tag}
                           </div>
                         </div>
 
-                        {/* Buy Button */}
-                          {viewMode === "grid" && (
-                            <button onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }}
-                              className="w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700 transition flex items-center justify-center gap-2"
-                            >
-                              <ShoppingCart className="h-4 w-4" />
-                                Mua ngay
-                            </button>
-                          )}
+                        {/* Wishlist */}
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            toggleFavorite(product.id);
+                          }}
+                          className="absolute left-2 top-2 rounded-full bg-white p-2 shadow-md"
+                        >
+                          <Heart
+                            className={`h-4 w-4 ${
+                              favorites.has(product.id)
+                                ? "fill-red-500 text-red-500"
+                                : "text-gray-400"
+                              }`}
+                          />
+                        </button>
                       </div>
 
-                      {/* Buy Button for List View */}
-                      {viewMode === "list" && (
-                        <button onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          }}
-                          className="rounded-lg bg-blue-600 px-6 py-2 text-sm font-bold text-white hover:bg-blue-700 transition flex items-center justify-center gap-2 h-fit"
-                        >
-                          <ShoppingCart className="h-4 w-4" />
-                            Mua ngay
-                          </button>
+                      {/* Info */}
+                      <div className="mb-4">
+                        <p className="text-xs text-gray-500">{product.type}</p>
+                        <h3 className="font-semibold line-clamp-2">
+                          {product.title}
+                        </h3>
+                        <p className="text-xs text-gray-500">
+                          {product.condition} • {product.year}
+                        </p>
+                        <p className="text-xs text-gray-600">
+                          {product.author}
+                        </p>
+                      </div>
+                  </>
+                  </Link>
+
+                  {/* PRICE + BUTTON  */}
+                  <div className="mt-auto flex flex-col gap-3">
+                   {/* Price */}
+                    <div className="flex items-baseline gap-2">
+                        <p className="text-lg font-bold text-blue-600">
+                          {product.price}
+                        </p>
+                        {product.originalPrice && (
+                          <p className="text-xs line-through text-gray-500">
+                            {product.originalPrice}
+                          </p>
                         )}
                     </div>
-                  </Link>
-              ))}                       
+
+                    {/* Button */}
+                    <button
+                        onClick={() => {
+                          if (product.tag === "Thuê") {
+                            router.push(`/hire?productId=${product.id}`);
+                            } else {
+                            router.push(`/checkout?productId=${product.id}`);
+                            }
+                          }}
+                      className={`w-full rounded-lg px-4 py-2 text-sm font-bold text-white flex items-center justify-center gap-2 ${
+                        product.tag === "Thuê" ? "bg-orange-500 hover:bg-orange-600"
+                          : "bg-blue-600 hover:bg-blue-700"
+                    }`}>
+                      <ShoppingCart className="h-4 w-4" />
+                        {product.tag === "Thuê" ? "Thuê ngay" : "Mua ngay"}
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
 
             {/* PAGINATION */}
